@@ -298,7 +298,7 @@ export const UnitStickersModal: React.FC<UnitStickersModalProps> = ({
           <div className="flex items-center gap-1 min-w-0">
             {showLogo && (
               <img
-                src={settings.logoUrl || '/logo.png'}
+                src={settings.logoUrl || '/logo.jpg'}
                 alt=""
                 className="w-4 h-4 object-contain rounded shrink-0"
                 onError={(e) => {

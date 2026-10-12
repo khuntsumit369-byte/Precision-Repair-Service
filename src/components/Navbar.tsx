@@ -114,7 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 title={lang === 'gu' ? 'ડેશબોર્ડ પર જાઓ' : 'Go to Dashboard'}
               >
                 <img
-                  src={settings.logoUrl || '/logo.png'}
+                  src={settings.logoUrl || '/logo.jpg'}
                   alt="PRECISION REPAIR SERVICE Logo"
                   className="w-full h-full object-contain rounded-lg"
                   onError={(e) => {

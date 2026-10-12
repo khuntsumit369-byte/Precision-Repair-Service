@@ -11,7 +11,7 @@ export const INITIAL_SETTINGS: WorkshopSettings = {
   address: 'Shop No. 12, Soni Bazar, Gold Complex, Near Tower',
   city: 'Rajkot - 360001, Gujarat',
   gstin: '24AAAAA0000A1Z5',
-  logoUrl: '/logo.png',
+  logoUrl: '/logo.jpg',
   terms: [
     'Unit tracking code sticker is affixed on each machine for service identification.',
     'Please inspect and verify the machine working at the time of delivery.',

@@ -176,6 +176,7 @@ export function loadSettings(): WorkshopSettings {
     return {
       ...INITIAL_SETTINGS,
       ...parsed,
+      logoUrl: '/logo.jpg',
     };
   } catch (e) {
     console.error('Error loading settings:', e);

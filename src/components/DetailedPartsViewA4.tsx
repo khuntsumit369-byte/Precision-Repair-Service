@@ -15,7 +15,7 @@ export const DetailedPartsViewA4: React.FC<DetailedPartsViewA4Props> = ({
   settings,
   lang,
 }) => {
-  const logoSrc = settings.logoUrl || '/logo.png';
+  const logoSrc = settings.logoUrl || '/logo.jpg';
 
   return (
     <div

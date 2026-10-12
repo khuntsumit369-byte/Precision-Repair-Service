@@ -115,6 +115,7 @@ export interface PurchaseRecord {
   id: string;
   purchaseNo: string; // e.g. "PUR-2026-001"
   billNumber?: string; // vendor bill number
+  supplierId?: string; // linked SupplierClient id from Supplier Master
   vendorName: string; // e.g. "Royal Spares Rajkot", "Gujarat Micro-Tools"
   vendorPhone?: string;
   date: string;

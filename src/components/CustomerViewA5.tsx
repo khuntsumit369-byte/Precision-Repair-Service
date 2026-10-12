@@ -16,7 +16,7 @@ export const CustomerViewA5: React.FC<CustomerViewA5Props> = ({
   lang,
 }) => {
   const categoryGroups = groupInvoiceUnitsByCategory(invoice);
-  const logoSrc = settings.logoUrl || '/logo.png';
+  const logoSrc = settings.logoUrl || '/logo.jpg';
 
   return (
     <div

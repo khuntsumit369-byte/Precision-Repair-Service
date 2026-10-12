@@ -94,7 +94,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="relative group shrink-0">
               <div className="w-16 h-16 rounded-2xl bg-white p-1 border border-white/40 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
                 <img
-                  src={settings.logoUrl || '/logo.png'}
+                  src={settings.logoUrl || '/logo.jpg'}
                   alt={settings.workshopName}
                   className="w-full h-full object-contain rounded-xl"
                   onError={(e) => {

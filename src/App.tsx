@@ -117,7 +117,9 @@ export default function App() {
     const initialUnitMasters = loadUnitMasters();
     const initialSuppliers = loadSuppliers();
     const initialStaff = loadStaffMembers();
-    const initialSettings = loadSettings();
+    const loadedSettings = loadSettings();
+    const initialSettings = { ...loadedSettings, logoUrl: '/logo.jpg' };
+    saveSettings(initialSettings);
 
     setCatalog(initialCatalog);
     setInvoices(initialInvoices);
@@ -889,11 +891,14 @@ export default function App() {
           <PartsPurchaseAndStockView
             catalog={catalog}
             purchases={purchases}
+            suppliers={suppliers}
             onSaveCatalogItem={handleSaveCatalogItem}
             onDeleteCatalogItem={handleDeleteCatalogItem}
             onRecordPurchase={handleRecordPurchase}
             onUpdatePurchase={handleUpdatePurchase}
             onDeletePurchase={handleDeletePurchase}
+            onSaveSupplier={handleSaveSupplier}
+            onNavigateToSuppliers={() => setActiveTab('masters')}
             lang={lang}
           />
         )}

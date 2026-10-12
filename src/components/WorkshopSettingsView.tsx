@@ -196,7 +196,7 @@ export const WorkshopSettingsView: React.FC<WorkshopSettingsViewProps> = ({
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="w-20 h-20 rounded-xl bg-white border-2 border-indigo-200 p-1 flex items-center justify-center shadow-xs overflow-hidden shrink-0">
                 <img
-                  src={formData.logoUrl || '/logo.png'}
+                  src={formData.logoUrl || '/logo.jpg'}
                   alt="Logo Preview"
                   className="w-full h-full object-contain rounded-lg"
                 />
@@ -215,7 +215,7 @@ export const WorkshopSettingsView: React.FC<WorkshopSettingsViewProps> = ({
                   </label>
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, logoUrl: '/logo.png' })}
+                    onClick={() => setFormData({ ...formData, logoUrl: '/logo.jpg' })}
                     className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-medium transition-colors"
                   >
                     {lang === 'gu' ? 'ડિફોલ્ટ લોગો રાખો' : 'Reset to Default Logo'}

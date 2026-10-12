@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CatalogItem, PurchaseItem, PurchaseRecord } from '../types';
+import { CatalogItem, PurchaseItem, PurchaseRecord, SupplierClient } from '../types';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import {
@@ -20,27 +20,34 @@ import {
   Edit2,
   ArrowUpRight,
   Filter,
+  Building2,
 } from 'lucide-react';
 
 interface PartsPurchaseAndStockViewProps {
   catalog: CatalogItem[];
   purchases: PurchaseRecord[];
+  suppliers?: SupplierClient[];
   onSaveCatalogItem: (item: CatalogItem) => void;
   onDeleteCatalogItem: (itemId: string) => void;
   onRecordPurchase: (purchase: PurchaseRecord, updatedCatalog: CatalogItem[]) => void;
   onUpdatePurchase?: (purchase: PurchaseRecord, updatedCatalog: CatalogItem[]) => void;
   onDeletePurchase?: (purchaseId: string) => void;
+  onSaveSupplier?: (supplier: SupplierClient) => void;
+  onNavigateToSuppliers?: () => void;
   lang: 'gu' | 'en';
 }
 
 export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps> = ({
   catalog,
   purchases,
+  suppliers = [],
   onSaveCatalogItem,
   onDeleteCatalogItem,
   onRecordPurchase,
   onUpdatePurchase,
   onDeletePurchase,
+  onSaveSupplier,
+  onNavigateToSuppliers,
   lang,
 }) => {
   const [activeTab, setActiveTab] = useState<'stock' | 'purchases'>('stock');
@@ -54,6 +61,7 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
   const [editingPurchase, setEditingPurchase] = useState<PurchaseRecord | null>(null);
 
   // New Purchase Bill form state
+  const [selectedSupplierId, setSelectedSupplierId] = useState('');
   const [purchaseVendor, setPurchaseVendor] = useState('');
   const [purchaseBillNo, setPurchaseBillNo] = useState('');
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
@@ -64,6 +72,15 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
   const [selectedPartIdToAdd, setSelectedPartIdToAdd] = useState('');
   const [purchaseQtyToAdd, setPurchaseQtyToAdd] = useState(10);
   const [purchaseCostToAdd, setPurchaseCostToAdd] = useState(0);
+
+  // Quick Add Supplier in Master modal state
+  const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+  const [newSupName, setNewSupName] = useState('');
+  const [newSupPhone, setNewSupPhone] = useState('');
+  const [newSupCity, setNewSupCity] = useState('');
+  const [newSupContact, setNewSupContact] = useState('');
+  const [newSupGst, setNewSupGst] = useState('');
+  const [newSupCategory, setNewSupCategory] = useState('Spare Parts Distributor');
 
   // Only physical spare parts
   const spareParts = catalog.filter((i) => i.type === 'part');
@@ -136,6 +153,7 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
     setEditingPurchase(null);
     const today = new Date().toISOString().split('T')[0];
     setPurchaseDate(today);
+    setSelectedSupplierId('');
     setPurchaseVendor('');
     setPurchaseBillNo('');
     setPurchaseVendorPhone('');
@@ -155,9 +173,13 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
   const handleOpenEditPurchase = (purchase: PurchaseRecord) => {
     setEditingPurchase(purchase);
     setPurchaseDate(purchase.date);
+    const foundSup = suppliers.find(
+      (s) => (purchase.supplierId && s.id === purchase.supplierId) || s.name.trim().toLowerCase() === purchase.vendorName.trim().toLowerCase()
+    );
+    setSelectedSupplierId(foundSup ? foundSup.id : '');
     setPurchaseVendor(purchase.vendorName);
     setPurchaseBillNo(purchase.billNumber || '');
-    setPurchaseVendorPhone(purchase.vendorPhone || '');
+    setPurchaseVendorPhone(purchase.vendorPhone || foundSup?.phone || '');
     setPurchasePaymentMode(purchase.paymentMode || 'Cash');
     setPurchaseNotes(purchase.notes || '');
     setPurchaseItems([...purchase.items]);
@@ -168,6 +190,38 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
       setPurchaseQtyToAdd(10);
     }
     setShowPurchaseModal(true);
+  };
+
+  // Quick register a new supplier into Client/Supplier Master directly from Purchase dialog
+  const handleQuickAddSupplier = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSupName.trim() || !newSupPhone.trim() || !newSupCity.trim()) {
+      alert(lang === 'gu' ? 'કૃપા કરીને વેન્ડરનું નામ, ફોન અને શહેર દાખલ કરો.' : 'Please enter vendor name, phone, and city.');
+      return;
+    }
+    const newSup: SupplierClient = {
+      id: 'sup-' + Date.now(),
+      name: newSupName.trim(),
+      phone: newSupPhone.trim(),
+      city: newSupCity.trim(),
+      contactPerson: newSupContact.trim() || undefined,
+      gstNumber: newSupGst.trim() || undefined,
+      category: newSupCategory.trim() || 'Spare Parts Distributor',
+    };
+    if (onSaveSupplier) {
+      onSaveSupplier(newSup);
+    }
+    // Auto-select this newly registered supplier
+    setSelectedSupplierId(newSup.id);
+    setPurchaseVendor(newSup.name);
+    setPurchaseVendorPhone(newSup.phone);
+
+    // Reset quick form
+    setNewSupName('');
+    setNewSupPhone('');
+    setNewSupCity('');
+    setNewSupContact('');
+    setNewSupGst('');
   };
 
   // Custom Delete Confirmation Modal State
@@ -231,8 +285,15 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
   // Save or Update Purchase Bill and adjust Stock in Catalog
   const handleSavePurchaseBill = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!purchaseVendor.trim()) {
-      alert(lang === 'gu' ? 'કૃપા કરીને વેન્ડર / સપ્લાયરનું નામ દાખલ કરો' : 'Please enter vendor name');
+    if (!purchaseVendor.trim() || !selectedSupplierId) {
+      alert(lang === 'gu' ? 'કૃપા કરીને સપ્લાયર માસ્ટરમાંથી વેન્ડર પસંદ કરો.' : 'Please select a vendor from Supplier Master.');
+      return;
+    }
+    const matchingSupplier = suppliers.find(
+      (s) => s.id === selectedSupplierId || s.name.trim().toLowerCase() === purchaseVendor.trim().toLowerCase()
+    );
+    if (!matchingSupplier) {
+      alert(lang === 'gu' ? 'આ વેન્ડર સપ્લાયર માસ્ટરમાં ઉપલબ્ધ નથી. કૃપા કરીને સપ્લાયર માસ્ટરમાંથી જ પસંદ કરો.' : 'Vendor must be registered in Supplier Master.');
       return;
     }
     if (purchaseItems.length === 0) {
@@ -247,8 +308,9 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
       const updatedPurchase: PurchaseRecord = {
         ...editingPurchase,
         billNumber: purchaseBillNo.trim() || undefined,
-        vendorName: purchaseVendor.trim(),
-        vendorPhone: purchaseVendorPhone.trim() || undefined,
+        supplierId: matchingSupplier.id,
+        vendorName: matchingSupplier.name,
+        vendorPhone: matchingSupplier.phone || purchaseVendorPhone.trim() || undefined,
         date: purchaseDate,
         items: purchaseItems,
         totalAmount: totalBill,
@@ -309,8 +371,9 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
         id: 'pur-' + Date.now(),
         purchaseNo,
         billNumber: purchaseBillNo.trim() || undefined,
-        vendorName: purchaseVendor.trim(),
-        vendorPhone: purchaseVendorPhone.trim() || undefined,
+        supplierId: matchingSupplier.id,
+        vendorName: matchingSupplier.name,
+        vendorPhone: matchingSupplier.phone || purchaseVendorPhone.trim() || undefined,
         date: purchaseDate,
         items: purchaseItems,
         totalAmount: totalBill,
@@ -759,17 +822,110 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
             <form onSubmit={handleSavePurchaseBill} className="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    {lang === 'gu' ? 'વેન્ડર / સપ્લાયર નામ (Vendor Name)' : 'Vendor / Supplier Name'} *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder={lang === 'gu' ? 'દા.ત. Royal Spares Rajkot' : 'e.g. Royal Spares'}
-                    value={purchaseVendor}
-                    onChange={(e) => setPurchaseVendor(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 font-medium"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-bold text-slate-800">
+                      {lang === 'gu' ? 'વેન્ડર / સપ્લાયર નામ (સપ્લાયર માસ્ટરમાંથી)' : 'Vendor / Supplier Name (From Supplier Master)'} *
+                    </label>
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                      {lang === 'gu' ? 'સપ્લાયર માસ્ટરમાંથી જ પસંદ કરો' : 'Mandatory from Master'}
+                    </span>
+                  </div>
+
+                  {/* Strictly dropdown from Supplier Master - Manual arbitrary typing is completely disabled */}
+                  {suppliers.length > 0 ? (
+                    <select
+                      required
+                      value={selectedSupplierId}
+                      onChange={(e) => {
+                        const supId = e.target.value;
+                        setSelectedSupplierId(supId);
+                        const found = suppliers.find((s) => s.id === supId);
+                        if (found) {
+                          setPurchaseVendor(found.name);
+                          setPurchaseVendorPhone(found.phone || '');
+                        } else {
+                          setPurchaseVendor('');
+                          setPurchaseVendorPhone('');
+                        }
+                      }}
+                      className="w-full px-3 py-2 text-xs bg-white border-2 border-amber-300 focus:border-amber-500 rounded-xl focus:ring-2 focus:ring-amber-500 font-bold text-slate-900 shadow-2xs"
+                    >
+                      <option value="">
+                        -- {lang === 'gu' ? 'સપ્લાયર માસ્ટરમાંથી વેન્ડર પસંદ કરો' : 'Select Vendor from Supplier Master'} * --
+                      </option>
+                      {suppliers.map((sup) => (
+                        <option key={sup.id} value={sup.id}>
+                          {sup.name} {sup.city ? `(${sup.city})` : ''} {sup.phone ? `• ${sup.phone}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center justify-between gap-2">
+                      <span>
+                        {lang === 'gu'
+                          ? 'સપ્લાયર માસ્ટરમાં કોઈ વેન્ડર ઉમેરેલ નથી.'
+                          : 'No suppliers registered in Supplier Master.'}
+                      </span>
+                      {onNavigateToSuppliers && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowPurchaseModal(false);
+                            onNavigateToSuppliers();
+                          }}
+                          className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold shrink-0"
+                        >
+                          {lang === 'gu' ? 'સપ્લાયર માસ્ટર ખોલો' : 'Open Supplier Master'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Selected Supplier Details Preview */}
+                  {selectedSupplierId && (() => {
+                    const activeSup = suppliers.find((s) => s.id === selectedSupplierId);
+                    if (!activeSup) return null;
+                    return (
+                      <div className="mt-2 p-2.5 bg-amber-50/80 border border-amber-200 rounded-xl text-[11px] text-amber-950 flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="font-bold flex items-center gap-1 text-amber-900">
+                          <Building2 className="w-3.5 h-3.5 text-amber-700" />
+                          {activeSup.name}
+                        </span>
+                        {activeSup.contactPerson && (
+                          <span>
+                            <strong className="text-amber-800">{lang === 'gu' ? 'સંપર્ક:' : 'Contact:'}</strong> {activeSup.contactPerson}
+                          </span>
+                        )}
+                        {activeSup.city && (
+                          <span>
+                            <strong className="text-amber-800">{lang === 'gu' ? 'શહેર:' : 'City:'}</strong> {activeSup.city}
+                          </span>
+                        )}
+                        {activeSup.gstNumber && (
+                          <span className="font-mono text-[10px] text-amber-800 bg-white/70 px-1.5 py-0.5 rounded border border-amber-200">
+                            GST: {activeSup.gstNumber}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Quick button to register a new vendor into Supplier Master */}
+                  <div className="mt-1.5 flex items-center justify-between text-[11px]">
+                    <span className="text-slate-500 italic">
+                      {lang === 'gu' ? '* ખરીદી બિલમાં ફક્ત સપ્લાયર માસ્ટરના જ નામ આવશે' : '* Only vendors from Supplier Master are permitted'}
+                    </span>
+                    {onSaveSupplier && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAddSupplierModal(true)}
+                        className="text-amber-700 hover:text-amber-800 font-bold hover:underline inline-flex items-center gap-1"
+                      >
+                        <PlusCircle className="w-3.5 h-3.5" />
+                        <span>{lang === 'gu' ? '+ સપ્લાયર માસ્ટરમાં નવો વેન્ડર ઉમેરો' : '+ Add New Supplier in Master'}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -789,7 +945,7 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    {lang === 'gu' ? 'વેન્ડર બિલ નંબર (Invoice #)' : 'Vendor Bill Number'}
+                    {lang === 'gu' ? 'વેન્ડર બિલ નંબર (Vendor Invoice #)' : 'Vendor Invoice #'}
                   </label>
                   <input
                     type="text"
@@ -802,14 +958,14 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    {lang === 'gu' ? 'વેન્ડર ફોન નંબર' : 'Vendor Phone'}
+                    {lang === 'gu' ? 'વેન્ડર ફોન નંબર (માસ્ટરમાંથી)' : 'Vendor Phone (from Master)'}
                   </label>
                   <input
                     type="text"
-                    placeholder="+91 98250..."
+                    readOnly
+                    placeholder={lang === 'gu' ? 'સપ્લાયર પસંદ કરતાં આપોઆપ આવશે' : 'Auto-filled from Master'}
                     value={purchaseVendorPhone}
-                    onChange={(e) => setPurchaseVendorPhone(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl"
+                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-700 font-medium cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -1103,6 +1259,145 @@ export const PartsPurchaseAndStockView: React.FC<PartsPurchaseAndStockViewProps>
                   className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl"
                 >
                   Save Part
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* QUICK MODAL: Add New Supplier into Supplier Master */}
+      {showAddSupplierModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95">
+            <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-amber-50 to-orange-50 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900">
+                    {lang === 'gu'
+                      ? 'સપ્લાયર માસ્ટરમાં નવો વેન્ડર ઉમેરો'
+                      : 'Register New Vendor into Supplier Master'}
+                  </h2>
+                  <p className="text-[11px] text-slate-500">
+                    {lang === 'gu'
+                      ? 'અહીં ઉમેરેલ વેન્ડર સીધો Supplier Master માં સેવ થશે અને ખરીદી બિલમાં સિલેક્ટ થશે.'
+                      : 'Saved directly into Supplier Master and auto-selected for purchase billing.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddSupplierModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white/80"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleQuickAddSupplier} className="p-6 space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {lang === 'gu' ? 'વેન્ડર / પેઢીનું નામ (Vendor / Firm Name)' : 'Vendor / Firm Name'} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={lang === 'gu' ? 'દા.ત. Navkar Micro Spares' : 'e.g. Navkar Micro Spares'}
+                    value={newSupName}
+                    onChange={(e) => setNewSupName(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {lang === 'gu' ? 'સંપર્ક વ્યક્તિ (Contact Person)' : 'Contact Person'}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={lang === 'gu' ? 'દા.ત. જીગ્નેશભાઈ' : 'e.g. Jignesh Patel'}
+                    value={newSupContact}
+                    onChange={(e) => setNewSupContact(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {lang === 'gu' ? 'મોબાઇલ નંબર (Phone Number)' : 'Phone Number'} *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+91 98250 12345"
+                    value={newSupPhone}
+                    onChange={(e) => setNewSupPhone(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {lang === 'gu' ? 'શહેર (City)' : 'City'} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={lang === 'gu' ? 'દા.ત. રાજકોટ / અમદાવાદ' : 'e.g. Rajkot / Ahmedabad'}
+                    value={newSupCity}
+                    onChange={(e) => setNewSupCity(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {lang === 'gu' ? 'GST નંબર (GSTIN)' : 'GST Number'}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="24AAAAA0000A1Z5"
+                    value={newSupGst}
+                    onChange={(e) => setNewSupGst(e.target.value.toUpperCase())}
+                    className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl font-mono uppercase"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {lang === 'gu' ? 'કેટેગરી / સ્પેશ્યાલાઇઝેશન' : 'Category'}
+                  </label>
+                  <select
+                    value={newSupCategory}
+                    onChange={(e) => setNewSupCategory(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl"
+                  >
+                    <option value="Spare Parts Distributor">Spare Parts Distributor (સ્પેરપાર્ટ્સ ડીલર)</option>
+                    <option value="Dental & Precision Importer">Dental & Precision Importer (ડેન્ટલ સાધનો)</option>
+                    <option value="Electronic Components">Electronic Components (ઇલેક્ટ્રોનિક્સ)</option>
+                    <option value="Micro-Bearing Vendor">Micro-Bearing Vendor (બેરિંગ વેન્ડર)</option>
+                    <option value="Other">Other / General Vendor</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setShowAddSupplierModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                >
+                  {lang === 'gu' ? 'રદ કરો' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-xs"
+                >
+                  {lang === 'gu' ? 'માસ્ટરમાં ઉમેરો અને પસંદ કરો' : 'Save in Master & Select'}
                 </button>
               </div>
             </form>
