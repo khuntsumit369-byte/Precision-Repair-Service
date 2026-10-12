@@ -1,0 +1,246 @@
+{
+  "entities": {
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Customer repair service invoice with repaired units, parts, services, and payment status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "date": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "customerCity": { "type": "string" },
+        "units": { "type": "array" },
+        "totalUnitsCount": { "type": "number" },
+        "partsTotal": { "type": "number" },
+        "servicesTotal": { "type": "number" },
+        "subtotal": { "type": "number" },
+        "discount": { "type": "number" },
+        "taxPercent": { "type": "number" },
+        "taxAmount": { "type": "number" },
+        "grandTotal": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "balanceDue": { "type": "number" },
+        "paymentStatus": { "type": "string" },
+        "paymentMode": { "type": "string" },
+        "remarks": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "invoiceNumber", "date", "customerId", "customerName", "grandTotal", "balanceDue", "paymentStatus"]
+    },
+    "CatalogItem": {
+      "title": "CatalogItem",
+      "description": "Spare part or service catalog item in inventory",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "nameGu": { "type": "string" },
+        "type": { "type": "string" },
+        "salePrice": { "type": "number" },
+        "costPrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "unit": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "required": ["id", "code", "name", "type", "salePrice", "costPrice"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer contact details and ledger balances",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "contactPerson": { "type": "string" },
+        "phone": { "type": "string" },
+        "city": { "type": "string" },
+        "address": { "type": "string" },
+        "gstNumber": { "type": "string" },
+        "balanceDue": { "type": "number" },
+        "totalInvoicesCount": { "type": "number" },
+        "totalBilledAmount": { "type": "number" }
+      },
+      "required": ["id", "name", "phone", "city", "balanceDue"]
+    },
+    "PaymentRecord": {
+      "title": "PaymentRecord",
+      "description": "Payment receipt collected against invoice or customer ledger",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "invoiceId": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "date": { "type": "string" },
+        "amount": { "type": "number" },
+        "discountWaived": { "type": "number" },
+        "paymentMode": { "type": "string" },
+        "referenceNo": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "customerId", "customerName", "date", "amount", "paymentMode"]
+    },
+    "PurchaseRecord": {
+      "title": "PurchaseRecord",
+      "description": "Spare parts purchase bill from supplier with inventory stock update",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "purchaseNo": { "type": "string" },
+        "billNumber": { "type": "string" },
+        "vendorName": { "type": "string" },
+        "vendorPhone": { "type": "string" },
+        "date": { "type": "string" },
+        "items": { "type": "array" },
+        "totalAmount": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "paymentMode": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "purchaseNo", "vendorName", "date", "items", "totalAmount"]
+    },
+    "ExpenseRecord": {
+      "title": "ExpenseRecord",
+      "description": "Workshop daily cash flow expenditure entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "expenseNo": { "type": "string" },
+        "date": { "type": "string" },
+        "category": { "type": "string" },
+        "title": { "type": "string" },
+        "amount": { "type": "number" },
+        "paymentMode": { "type": "string" },
+        "paidTo": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "expenseNo", "date", "category", "title", "amount", "paymentMode"]
+    },
+    "WorkshopSettings": {
+      "title": "WorkshopSettings",
+      "description": "Workshop configuration profile, contact info, logo, and terms",
+      "type": "object",
+      "properties": {
+        "workshopName": { "type": "string" },
+        "workshopNameGu": { "type": "string" },
+        "tagline": { "type": "string" },
+        "ownerName": { "type": "string" },
+        "phone": { "type": "string" },
+        "altPhone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "gstin": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "terms": { "type": "array" },
+        "defaultWarrantyDays": { "type": "number" },
+        "currencySymbol": { "type": "string" }
+      },
+      "required": ["workshopName", "ownerName", "phone", "address", "city"]
+    },
+    "UnitMasterItem": {
+      "title": "UnitMasterItem",
+      "description": "Repair unit catalog category and standard issue master",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "nameGu": { "type": "string" },
+        "category": { "type": "string" },
+        "codePrefix": { "type": "string" },
+        "defaultServiceCharge": { "type": "number" },
+        "defaultWarrantyDays": { "type": "number" },
+        "commonIssues": { "type": "array" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "name", "category", "codePrefix", "defaultServiceCharge", "active"]
+    },
+    "SupplierClient": {
+      "title": "SupplierClient",
+      "description": "Spare parts supplier contact and company info",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "contactPerson": { "type": "string" },
+        "phone": { "type": "string" },
+        "city": { "type": "string" },
+        "address": { "type": "string" },
+        "gstNumber": { "type": "string" },
+        "category": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "name", "phone", "city"]
+    },
+    "StaffMember": {
+      "title": "StaffMember",
+      "description": "Workshop technician and staff member profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "nameGu": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string" },
+        "salary": { "type": "number" },
+        "salaryType": { "type": "string" },
+        "joiningDate": { "type": "string" },
+        "active": { "type": "boolean" },
+        "address": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "phone", "role", "salary", "active"]
+    }
+  },
+  "firestore": {
+    "/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Workshop repair invoices"
+    },
+    "/catalog/{itemId}": {
+      "schema": "CatalogItem",
+      "description": "Spare parts & service catalog"
+    },
+    "/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Customer list and ledger balances"
+    },
+    "/payments/{paymentId}": {
+      "schema": "PaymentRecord",
+      "description": "Payment receipt transactions"
+    },
+    "/purchases/{purchaseId}": {
+      "schema": "PurchaseRecord",
+      "description": "Spare parts purchase records"
+    },
+    "/expenses/{expenseId}": {
+      "schema": "ExpenseRecord",
+      "description": "Daily workshop expenses"
+    },
+    "/settings/{settingId}": {
+      "schema": "WorkshopSettings",
+      "description": "Workshop configuration profile and terms"
+    },
+    "/unit_masters/{unitMasterId}": {
+      "schema": "UnitMasterItem",
+      "description": "Unit equipment masters"
+    },
+    "/suppliers/{supplierId}": {
+      "schema": "SupplierClient",
+      "description": "Vendor directory"
+    },
+    "/staff/{staffId}": {
+      "schema": "StaffMember",
+      "description": "Staff member directory"
+    }
+  }
+}

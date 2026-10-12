@@ -1,0 +1,8 @@
+{
+  "name": "PRECISION - Service \u0026 Parts Billing",
+  "description": "Multi-unit repair service billing, spare parts management, unit tracking codes, and customer accounting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

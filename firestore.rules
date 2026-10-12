@@ -1,0 +1,125 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Connection testing doc
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+
+    // Counters collection for atomic multi-device invoice numbering
+    match /counters/{counterId} {
+      allow read, write: if isValidId(counterId);
+    }
+
+    // Invoices collection
+    match /invoices/{invoiceId} {
+      allow read: if true;
+      allow create, update: if isValidId(invoiceId) &&
+        incoming().invoiceNumber is string && incoming().invoiceNumber.size() > 0 && incoming().invoiceNumber.size() <= 100 &&
+        incoming().customerId is string && incoming().customerId.size() <= 128 &&
+        incoming().customerName is string && incoming().customerName.size() > 0 && incoming().customerName.size() <= 200 &&
+        incoming().grandTotal is number && incoming().grandTotal >= 0;
+      allow delete: if isValidId(invoiceId);
+    }
+
+    // Catalog (Parts & Services) collection
+    match /catalog/{itemId} {
+      allow read: if true;
+      allow create, update: if isValidId(itemId) &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 200 &&
+        incoming().salePrice is number && incoming().salePrice >= 0;
+      allow delete: if isValidId(itemId);
+    }
+
+    // Customers collection
+    match /customers/{customerId} {
+      allow read: if true;
+      allow create, update: if isValidId(customerId) &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 200 &&
+        incoming().phone is string && incoming().phone.size() <= 30;
+      allow delete: if isValidId(customerId);
+    }
+
+    // Payments collection
+    match /payments/{paymentId} {
+      allow read: if true;
+      allow create, update: if isValidId(paymentId) &&
+        incoming().customerId is string && incoming().customerId.size() <= 128 &&
+        incoming().amount is number && incoming().amount >= 0;
+      allow delete: if isValidId(paymentId);
+    }
+
+    // Purchases collection
+    match /purchases/{purchaseId} {
+      allow read: if true;
+      allow create, update: if isValidId(purchaseId) &&
+        incoming().vendorName is string && incoming().vendorName.size() > 0 && incoming().vendorName.size() <= 200 &&
+        incoming().totalAmount is number && incoming().totalAmount >= 0;
+      allow delete: if isValidId(purchaseId);
+    }
+
+    // Expenses collection
+    match /expenses/{expenseId} {
+      allow read: if true;
+      allow create, update: if isValidId(expenseId) &&
+        incoming().title is string && incoming().title.size() > 0 && incoming().title.size() <= 200 &&
+        incoming().amount is number && incoming().amount >= 0;
+      allow delete: if isValidId(expenseId);
+    }
+
+    // Settings collection
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create, update: if isValidId(settingId) &&
+        incoming().workshopName is string && incoming().workshopName.size() > 0 && incoming().workshopName.size() <= 200;
+      allow delete: if isValidId(settingId);
+    }
+
+    // Unit Masters collection
+    match /unit_masters/{unitMasterId} {
+      allow read: if true;
+      allow create, update: if isValidId(unitMasterId) &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 200;
+      allow delete: if isValidId(unitMasterId);
+    }
+
+    // Suppliers collection
+    match /suppliers/{supplierId} {
+      allow read: if true;
+      allow create, update: if isValidId(supplierId) &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 200;
+      allow delete: if isValidId(supplierId);
+    }
+
+    // Staff collection
+    match /staff/{staffId} {
+      allow read: if true;
+      allow create, update: if isValidId(staffId) &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 200;
+      allow delete: if isValidId(staffId);
+    }
+  }
+}
