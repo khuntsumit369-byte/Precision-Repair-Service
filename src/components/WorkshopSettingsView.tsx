@@ -9,7 +9,6 @@ import {
   MapPin,
   Shield,
   Check,
-  Image as ImageIcon,
   Upload,
   Download,
   Database,
@@ -78,6 +77,19 @@ export const WorkshopSettingsView: React.FC<WorkshopSettingsViewProps> = ({
     });
   };
 
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setFormData((prev) => ({ ...prev, logoUrl: event.target?.result as string }));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleExportJson = () => {
     try {
       const dataToExport = currentData || {
@@ -115,19 +127,6 @@ export const WorkshopSettingsView: React.FC<WorkshopSettingsViewProps> = ({
         }
       };
       reader.readAsText(file);
-    }
-  };
-
-  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setFormData({ ...formData, logoUrl: event.target.result as string });
-        }
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -182,30 +181,38 @@ export const WorkshopSettingsView: React.FC<WorkshopSettingsViewProps> = ({
             <span>{lang === 'gu' ? 'દુકાન / વર્કશોપ વિગત' : 'Workshop Information'}</span>
           </h2>
 
-          {/* Logo Upload & Preview */}
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <label className="text-xs font-semibold text-slate-800 flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-indigo-600" />
-                <span>{lang === 'gu' ? 'દુકાનનો ઓફિશિયલ લોગો (Workshop Logo)' : 'Official Workshop Logo'}</span>
-              </label>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
-                {lang === 'gu' ? 'લોગો સેટ છે' : 'Active Logo'}
-              </span>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-20 h-20 rounded-xl bg-white border-2 border-indigo-200 p-1 flex items-center justify-center shadow-xs overflow-hidden shrink-0">
-                <img
-                  src={formData.logoUrl || '/logo.jpg'}
-                  alt="Logo Preview"
-                  className="w-full h-full object-contain rounded-lg"
-                />
-              </div>
-              <div className="flex-1 w-full space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors">
+          {/* Official Default Logo (JPG) Badge & Upload Controls */}
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <img
+                src={formData.logoUrl || '/logo.jpg'}
+                alt="Official Logo"
+                className="w-20 h-20 object-contain rounded-2xl bg-white border-2 border-indigo-200 p-1 shadow-xs shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/logo.png';
+                }}
+              />
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-900">
+                    {lang === 'gu' ? 'વર્કશોપ ઓફિશિયલ લોગો' : 'Workshop Official Logo'}
+                  </span>
+                  <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300">
+                    {lang === 'gu' ? 'કાયમી સેટ' : 'Active'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  {lang === 'gu'
+                    ? 'આ લોગો હેડર, ડેશબોર્ડ, કસ્ટમર બિલ (A5 & A4), ટ્રેકિંગ સ્ટીકર્સ અને એપ આઇકોનમાં બધી જ જગ્યાએ દેખાય છે.'
+                    : 'This logo appears in Header, Dashboard, Invoices (A5 & A4), Unit Stickers & App icons.'}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors">
                     <Upload className="w-3.5 h-3.5" />
-                    <span>{lang === 'gu' ? 'કમ્પ્યુટરમાંથી નવો લોગો અપલોડ કરો' : 'Upload New Logo Image'}</span>
+                    <span>
+                      {lang === 'gu' ? 'તમારો ઓરિજિનલ લોગો અપલોડ કરો (PNG/JPG)' : 'Upload Your Exact Logo (PNG/JPG)'}
+                    </span>
                     <input
                       type="file"
                       accept="image/*"
@@ -213,19 +220,16 @@ export const WorkshopSettingsView: React.FC<WorkshopSettingsViewProps> = ({
                       className="hidden"
                     />
                   </label>
+
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, logoUrl: '/logo.jpg' })}
-                    className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-medium transition-colors"
+                    onClick={() => setFormData((prev) => ({ ...prev, logoUrl: '/logo.jpg' }))}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold shadow-2xs transition-colors"
                   >
-                    {lang === 'gu' ? 'ડિફોલ્ટ લોગો રાખો' : 'Reset to Default Logo'}
+                    <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                    <span>{lang === 'gu' ? 'ડિફોલ્ટ લોગો સેટ કરો' : 'Reset to Default'}</span>
                   </button>
                 </div>
-                <p className="text-[11px] text-slate-500">
-                  {lang === 'gu'
-                    ? 'આ લોગો સોફ્ટવેરમાં ઉપર હેડરમાં, બિલના A5 અને A4 પ્રિન્ટમાં, વોટરમાર્કમાં તથા સ્ટીકર્સમાં દેખાશે.'
-                    : 'This logo appears in header, on printed invoices (A5/A4), and unit tracking stickers.'}
-                </p>
               </div>
             </div>
           </div>

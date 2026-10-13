@@ -27,7 +27,6 @@ interface DashboardProps {
   onNavigate: (tab: string) => void;
   onSelectInvoice: (invoice: Invoice) => void;
   lang: 'gu' | 'en';
-  onUpdateLogo?: (newLogoUrl: string) => void;
   onOpenAndroidInstall?: () => void;
 }
 
@@ -39,23 +38,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onNavigate,
   onSelectInvoice,
   lang,
-  onUpdateLogo,
   onOpenAndroidInstall,
 }) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && onUpdateLogo) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onUpdateLogo(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
   // Aggregate stats
   const totalRevenue = invoices.reduce((sum, i) => sum + i.grandTotal, 0);
   const totalPartsEarned = invoices.reduce((sum, i) => sum + i.partsTotal, 0);
@@ -91,28 +75,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-3.5 mb-2">
-            <div className="relative group shrink-0">
-              <div className="w-16 h-16 rounded-2xl bg-white p-1 border border-white/40 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
-                <img
-                  src={settings.logoUrl || '/logo.jpg'}
-                  alt={settings.workshopName}
-                  className="w-full h-full object-contain rounded-xl"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                />
-              </div>
-              {onUpdateLogo && (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  title={lang === 'gu' ? 'ઓરિજિનલ લોગો અપલોડ કરો (Same-to-Same Image)' : 'Upload Your Exact Logo File'}
-                  className="absolute -bottom-1 -right-1 p-1.5 bg-indigo-500 hover:bg-indigo-400 text-white rounded-full shadow-md border-2 border-slate-900 transition-transform hover:scale-110"
-                >
-                  <Camera className="w-3 h-3" />
-                </button>
-              )}
-            </div>
+            <img
+              src={settings.logoUrl || '/logo.jpg'}
+              alt="Precision Logo"
+              className="w-14 h-14 rounded-2xl object-contain bg-white p-1 border border-white/20 shadow-lg shrink-0"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/logo.png';
+              }}
+            />
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight uppercase">
                 {settings.workshopName}
@@ -129,17 +99,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3 items-center">
-            {/* Hidden file input for logo */}
-            {onUpdateLogo && (
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleLogoUpload}
-              />
-            )}
-
             <button
               onClick={() => onNavigate('new-invoice')}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg transition-all"
@@ -147,20 +106,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <Plus className="w-4 h-4" />
               <span>{lang === 'gu' ? '+ નવું બિલ બનાવો' : '+ Create Invoice'}</span>
             </button>
-
-            {onUpdateLogo && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-medium text-xs sm:text-sm rounded-xl backdrop-blur-xs transition-all border border-white/20"
-                title={lang === 'gu' ? 'તમારા કમ્પ્યુટર કે ફોનમાંથી ઓરિજિનલ લોગો ફાઈલ સિલેક્ટ કરો' : 'Upload exact logo image file from your device'}
-              >
-                <Upload className="w-4 h-4 text-indigo-300" />
-                <span>
-                  {lang === 'gu' ? 'ઓરિજિનલ લોગો ફાઈલ બદલો' : 'Upload Exact Logo File'}
-                </span>
-              </button>
-            )}
           </div>
         </div>
 

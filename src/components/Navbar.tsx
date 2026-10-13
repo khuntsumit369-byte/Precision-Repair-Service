@@ -25,7 +25,6 @@ interface NavbarProps {
   settings: WorkshopSettings;
   lang: 'gu' | 'en';
   onToggleLang: () => void;
-  onUpdateLogo?: (newLogoUrl: string) => void;
   onOpenAndroidInstall?: () => void;
 }
 
@@ -35,23 +34,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   settings,
   lang,
   onToggleLang,
-  onUpdateLogo,
   onOpenAndroidInstall,
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && onUpdateLogo) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onUpdateLogo(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
   const navItems = [
     {
       id: 'dashboard',
@@ -105,48 +89,20 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="bg-white border-b border-slate-200 sticky top-0 z-40 print:hidden shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3">
-            <div className="relative group shrink-0">
-              <div
-                onClick={() => onSelectTab('dashboard')}
-                className="w-11 h-11 rounded-xl bg-white border border-slate-200 p-0.5 shadow-sm overflow-hidden flex items-center justify-center cursor-pointer hover:border-indigo-400 transition-colors"
-                title={lang === 'gu' ? 'ડેશબોર્ડ પર જાઓ' : 'Go to Dashboard'}
-              >
-                <img
-                  src={settings.logoUrl || '/logo.jpg'}
-                  alt="PRECISION REPAIR SERVICE Logo"
-                  className="w-full h-full object-contain rounded-lg"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                />
-              </div>
-
-              {/* Quick Upload Button on Logo */}
-              {onUpdateLogo && (
-                <>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleLogoUpload}
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fileInputRef.current?.click();
-                    }}
-                    title={lang === 'gu' ? 'તમારો ઓરિજિનલ લોગો અપલોડ કરો (Same-to-Same File)' : 'Upload Your Exact Logo File'}
-                    className="absolute -bottom-1 -right-1 p-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-md border border-white transition-transform hover:scale-110"
-                  >
-                    <Camera className="w-2.5 h-2.5" />
-                  </button>
-                </>
-              )}
-            </div>
+          {/* Brand & Workshop Info with Official Logo */}
+          <div
+            onClick={() => onSelectTab('dashboard')}
+            className="flex items-center gap-3 cursor-pointer select-none"
+          >
+            <img
+              src={settings.logoUrl || '/logo.jpg'}
+              alt="Precision Logo"
+              className="w-10 h-10 object-contain rounded-xl bg-white shadow-xs p-0.5 border border-slate-200 shrink-0"
+              onError={(e) => {
+                // Fallback to logo.png if needed
+                (e.target as HTMLImageElement).src = '/logo.png';
+              }}
+            />
 
             <div
               onClick={() => onSelectTab('dashboard')}

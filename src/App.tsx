@@ -118,7 +118,7 @@ export default function App() {
     const initialSuppliers = loadSuppliers();
     const initialStaff = loadStaffMembers();
     const loadedSettings = loadSettings();
-    const initialSettings = { ...loadedSettings, logoUrl: '/logo.jpg' };
+    const initialSettings = { ...loadedSettings, logoUrl: loadedSettings.logoUrl || '/logo.jpg' };
     saveSettings(initialSettings);
 
     setCatalog(initialCatalog);
@@ -709,13 +709,6 @@ export default function App() {
     syncSettingsToCloud(newSettings);
   };
 
-  const handleUpdateLogo = (newLogoUrl: string) => {
-    const updated = { ...settings, logoUrl: newLogoUrl };
-    setSettings(updated);
-    saveSettings(updated);
-    syncSettingsToCloud(updated);
-  };
-
   const handleResetData = () => {
     setCatalog(loadCatalog());
     const invs = loadInvoices();
@@ -811,7 +804,6 @@ export default function App() {
         settings={settings}
         lang={lang}
         onToggleLang={handleToggleLang}
-        onUpdateLogo={handleUpdateLogo}
         onOpenAndroidInstall={() => setShowAndroidInstallModal(true)}
       />
 
@@ -826,7 +818,6 @@ export default function App() {
             onNavigate={handleSelectTab}
             onSelectInvoice={handleSelectInvoiceToView}
             lang={lang}
-            onUpdateLogo={handleUpdateLogo}
             onOpenAndroidInstall={() => setShowAndroidInstallModal(true)}
           />
         )}

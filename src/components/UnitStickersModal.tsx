@@ -159,7 +159,6 @@ export const UnitStickersModal: React.FC<UnitStickersModalProps> = ({
   const [selectedFormatId, setSelectedFormatId] = useState<string>('oddy-24');
   const [copiesPerUnit, setCopiesPerUnit] = useState<number>(1);
   const [skipBlankCount, setSkipBlankCount] = useState<number>(0);
-  const [showLogo, setShowLogo] = useState<boolean>(true);
   const [showBarcode, setShowBarcode] = useState<boolean>(true);
   const [showPartsSummary, setShowPartsSummary] = useState<boolean>(true);
   const [previewTab, setPreviewTab] = useState<'grid' | 'sheet'>('sheet');
@@ -293,19 +292,17 @@ export const UnitStickersModal: React.FC<UnitStickersModalProps> = ({
           minHeight: `${Math.max(26, currentFormat.labelHeightMm * 2.8)}px`,
         }}
       >
-        {/* Header: Logo / Workshop Name & Tracking Code */}
+        {/* Header: Workshop Name & Tracking Code */}
         <div className="flex items-center justify-between gap-1 border-b border-slate-200 pb-1 mb-0.5">
-          <div className="flex items-center gap-1 min-w-0">
-            {showLogo && (
-              <img
-                src={settings.logoUrl || '/logo.jpg'}
-                alt=""
-                className="w-4 h-4 object-contain rounded shrink-0"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
-            )}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <img
+              src={settings.logoUrl || '/logo.jpg'}
+              alt="Logo"
+              className="w-3.5 h-3.5 object-contain rounded-xs shrink-0 bg-white"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/logo.png';
+              }}
+            />
             <span className="font-black text-[10px] sm:text-[11px] truncate uppercase tracking-tight text-slate-900">
               {isMini ? 'PRS' : settings.workshopName}
             </span>
@@ -478,16 +475,6 @@ export const UnitStickersModal: React.FC<UnitStickersModalProps> = ({
 
             {/* Elements Toggles */}
             <div className="md:col-span-3 flex flex-wrap gap-2 text-xs">
-              <label className="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-slate-200 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showLogo}
-                  onChange={(e) => setShowLogo(e.target.checked)}
-                  className="rounded text-indigo-600"
-                />
-                <span className="font-semibold text-slate-700">Logo</span>
-              </label>
-
               <label className="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-slate-200 cursor-pointer">
                 <input
                   type="checkbox"

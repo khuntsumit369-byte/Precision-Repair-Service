@@ -15,8 +15,6 @@ export const DetailedPartsViewA4: React.FC<DetailedPartsViewA4Props> = ({
   settings,
   lang,
 }) => {
-  const logoSrc = settings.logoUrl || '/logo.jpg';
-
   return (
     <div
       id="invoice-detailed-a4"
@@ -26,41 +24,22 @@ export const DetailedPartsViewA4: React.FC<DetailedPartsViewA4Props> = ({
         minHeight: '1080px',
       }}
     >
-      {/* Background Large Logo Watermark */}
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden"
-        aria-hidden="true"
-      >
-        <div className="text-center opacity-[0.07] print:opacity-[0.09] transform scale-125">
-          <img
-            src={logoSrc}
-            alt=""
-            className="w-96 h-96 sm:w-[480px] sm:h-[480px] object-contain mx-auto grayscale"
-            onError={(e) => {
-              (e.target as HTMLElement).style.display = 'none';
-            }}
-          />
-        </div>
-      </div>
-
       {/* Content wrapper */}
       <div className="relative z-10 p-6 sm:p-8 flex flex-col justify-between h-full min-h-[1080px]">
         <div>
           {/* Header */}
           <div className="border-b-2 border-slate-900 pb-5 mb-5">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-              {/* Brand & Workshop Details */}
-              <div className="flex items-start gap-3.5">
-                <div className="w-16 h-16 rounded-xl bg-white border border-slate-300 p-1 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
-                  <img
-                    src={logoSrc}
-                    alt={settings.workshopName}
-                    className="w-full h-full object-contain rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = 'none';
-                    }}
-                  />
-                </div>
+              {/* Brand & Workshop Details with Official Logo */}
+              <div className="flex items-center gap-4">
+                <img
+                  src={settings.logoUrl || '/logo.jpg'}
+                  alt="Precision Logo"
+                  className="w-16 h-16 object-contain rounded-xl border border-slate-200 p-1 shrink-0 bg-white shadow-2xs"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/logo.png';
+                  }}
+                />
                 <div>
                   <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase whitespace-nowrap">
                     {settings.workshopName}

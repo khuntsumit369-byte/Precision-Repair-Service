@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Zap,
   Globe,
+  Wrench,
 } from 'lucide-react';
 import { usePWAInstall } from '../utils/usePWAInstall';
 
@@ -89,13 +90,13 @@ export const AndroidAppInstallModal: React.FC<AndroidAppInstallModalProps> = ({
           <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
           <div className="flex items-start justify-between relative z-10">
             <div className="flex items-center gap-3.5">
-              <div className="w-13 h-13 rounded-2xl bg-white/15 backdrop-blur-md p-2 flex items-center justify-center border border-white/20 shadow-inner shrink-0">
+              <div className="w-13 h-13 rounded-2xl bg-white/20 backdrop-blur-md p-1 flex items-center justify-center border border-white/30 shadow-inner shrink-0 bg-white">
                 <img
-                  src="/pwa-192x192.png"
-                  alt="App Icon"
-                  className="w-full h-full object-contain rounded-xl drop-shadow-sm"
+                  src="/logo.jpg"
+                  alt="Precision Logo"
+                  className="w-full h-full object-contain rounded-xl"
                   onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
+                    (e.target as HTMLImageElement).src = '/logo.png';
                   }}
                 />
               </div>
